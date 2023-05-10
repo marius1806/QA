@@ -29,6 +29,12 @@ runs:
       run: |
         composer require --dev  drupal/coder overtrue/phplint phpmd/phpmd
       shell: bash
+      
+    - name: 'Run phpstan'
+      uses: php-actions/phpstan@v3
+      with:
+        path: ./web/modules/custom ./web/themes/custom
+      
 
     - name: 'Check - Syntax'
       if: ${{ inputs.phplint == 'true' }}
