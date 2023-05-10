@@ -1,0 +1,56 @@
+name: 'Drupal 8+ code quality check'
+description: 'Verify custom code and theme quality on a Drupal composer-base repository'
+inputs:
+  phplint:
+    description: 'Run PHP Lint'
+    required: true
+    default: 'true'
+  phpmd:
+    description: 'Run PHP Mess Detector'
+    required: true
+    default: 'true'
+  phpcs:
+    description: 'Run PHP Code Sniffer'
+    required: true
+    default: 'true'
+  phpcs_standards:
+    description: 'List of standards for PHP Code Sniffer'
+    required: false
+    default: 'Drupal,DrupalPractice'
+  phpcs_extensions:
+    description: 'List of extensions for PHP Code Sniffer'
+    required: false
+    default: 'php,module,inc,install,profile,theme,test,info,yml'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Install required tools'
+      run: |
+        composer require --dev  drupal/coder overtrue/phplint phpmd/phpmd
+      shell: bash
+
+    - name: 'Check - Syntax'
+      if: ${{ inputs.phplint == 'true' }}
+      run: |
+        [ -d ./web/modules/custom ] && ./vendor/bin/phplint --no-cache --no-progress --extensions=php,module,inc,install,test,theme ./web/themes/custom/ ./web/modules/custom/
+      shell: bash
+
+    - name: 'Check - MD on modules'
+      if: ${{ inputs.phpmd == 'true' }}
+      run: |
+        [ -d ./web/modules/custom ] && wget https://raw.githubusercontent.com/eaudeweb/drupal-code-qa-action/main/phpmd.xml
+        [ -d ./web/modules/custom ] && ./vendor/bin/phpmd  ./web/modules/custom/ github phpmd.xml
+      shell: bash
+
+    - name: 'Check - Code Sniffer on modules'
+      if: ${{ inputs.phpcs == 'true' }}
+      run: |
+        [ -d ./web/modules/custom ] && ./vendor/bin/phpcs --standard=${{ inputs.phpcs_standards }} --extensions=${{ inputs.phpcs_extensions }} ./web/modules/custom/
+      shell: bash
+
+    - name: 'Check - Code Sniffer on themes'
+      if: ${{ inputs.phpcs == 'true' }}
+      run: |
+        [ -d ./web/themes/custom ] && ./vendor/bin/phpcs --standard=${{ inputs.phpcs_standards }} --extensions=${{ inputs.phpcs_extensions }} --ignore=node_modules ./web/themes/custom/
+      shell: bash
