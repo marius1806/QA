@@ -58,4 +58,4 @@ runs:
     - name: 'Run phpstan'
       uses: php-actions/phpstan@v3
       with:
-        path: ./web/modules/custom/*/src ./web/themes/custom/*/src
+        path: ./web/modules/custom/ ./web/themes/custom/
