@@ -55,13 +55,17 @@ runs:
         [ -d ./web/themes/custom ] && ./vendor/bin/phpcs --standard=${{ inputs.phpcs_standards }} --extensions=${{ inputs.phpcs_extensions }} --ignore=node_modules ./web/themes/custom/
       shell: bash
       
-    - name: 'Add phpstan to Drupal codebase'
+    - name: 'Run phpstan'
+      uses: php-actions/phpstan@v3
+      with:
+        php_version: 7.4
+        path: web/modules/custom/ web/themes/custom/
+        autoload_file: ./web/autoload.php
+        generate_baseline: ./phpstan-baseline.neon
+        level: 5
+      shell: bash
+
+    - name: 'Show phpstan errors'
       run: |
-        composer require --dev phpstan/phpstan \
-        phpstan/extension-installer \
-        mglaman/phpstan-drupal \
-        phpstan/phpstan-deprecation-rules \
-        phpstan/phpstan-phpunit \
-        jangregor/phpstan-prophecy
-        php ./vendor/bin/phpstan analyze --level 2 ./web/modules/custom
+        cat ./phpstan-baseline.neon
       shell: bash
