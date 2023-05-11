@@ -55,7 +55,13 @@ runs:
         [ -d ./web/themes/custom ] && ./vendor/bin/phpcs --standard=${{ inputs.phpcs_standards }} --extensions=${{ inputs.phpcs_extensions }} --ignore=node_modules ./web/themes/custom/
       shell: bash
       
-    - name: 'Run phpstan'
-      uses: php-actions/phpstan@v3
-      with:
-        path: ./web/modules/custom/ ./web/themes/custom/
+    - name: 'Add phpstan to Drupal codebase'
+      run: |
+        composer require --dev phpstan/phpstan \
+        phpstan/extension-installer \
+        mglaman/phpstan-drupal \
+        phpstan/phpstan-deprecation-rules \
+        phpstan/phpstan-phpunit \
+        jangregor/phpstan-prophecy
+        php ./vendor/bin/phpstan analyze --level 2 ./web/modules/custom
+      shell: bash
